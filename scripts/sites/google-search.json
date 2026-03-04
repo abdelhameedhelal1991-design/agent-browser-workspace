@@ -1,0 +1,50 @@
+{
+  "id": "google-search",
+  "name": "Google Search",
+  "hosts": [
+    "www.google.com",
+    "google.com"
+  ],
+  "baseUrl": "https://www.google.com",
+  "scraping": {
+    "selectors": {
+      "searchInput": "textarea[name=\"q\"], input[name=\"q\"]",
+      "resultAnchor": "#search a[href], #rso a[href], .MjjYud a[href], .tF2Cxc a[href]",
+      "resultTitle": "h3",
+      "resultBlock": ".MjjYud, .tF2Cxc, div.g, [data-hveid]",
+      "resultSnippet": "[data-sncf], [style*=\"-webkit-line-clamp\"], .VwiC3b, .lEBKkf",
+      "adContainers": "#tads, #bottomads, [data-text-ad], [data-ad-slot]",
+      "nextPage": "#pnnext, a[aria-label=\"Next\"], a[aria-label=\"Следующая\"], a[aria-label=\"Следующая страница\"]",
+      "paginationLink": "a[aria-label=\"Page {n}\"], a[aria-label=\"Страница {n}\"]"
+    }
+  },
+  "controls": {
+    "items": [
+      {
+        "name": "Поле поиска",
+        "selectorKey": "searchInput",
+        "description": "Основное поле ввода поискового запроса на странице Google. Обычно достаточно fill + Enter.",
+        "actions": [
+          "fill",
+          "press:Enter"
+        ]
+      },
+      {
+        "name": "Следующая страница результатов",
+        "selectorKey": "nextPage",
+        "description": "Кнопка/ссылка перехода к следующей странице выдачи.",
+        "actions": [
+          "click"
+        ]
+      },
+      {
+        "name": "Ссылка на конкретную страницу N",
+        "selectorKey": "paginationLink",
+        "description": "Ссылка пагинации на страницу N (1-based). В селектор подставляется {n}.",
+        "actions": [
+          "click"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "id": "youtube",
+  "name": "YouTube",
+  "hosts": [
+    "www.youtube.com",
+    "youtube.com",
+    "m.youtube.com",
+    "youtu.be"
+  ],
+  "scraping": {
+    "selectors": {
+      "watchMetadata": "ytd-watch-metadata",
+      "videoTitle": "h1.ytd-watch-metadata yt-formatted-string, h1 yt-formatted-string",
+      "descriptionExpander": "ytd-text-inline-expander#description-inline-expander, ytd-text-inline-expander#description",
+      "descriptionText": "ytd-text-inline-expander#description-inline-expander yt-formatted-string, ytd-text-inline-expander#description yt-formatted-string, #description yt-formatted-string",
+      "descriptionExpandButton": "ytd-text-inline-expander#description-inline-expander #expand, ytd-text-inline-expander#description #expand, tp-yt-paper-button#expand",
+      "transcriptOpenButton": "button[aria-label=\"Show transcript\"], button[aria-label=\"Transcript\"], button[aria-label=\"Показать расшифровку\"], button[aria-label=\"Транскрипт\"], button[aria-label=\"Расшифровка\"]",
+      "transcriptSegment": "ytd-transcript-segment-renderer",
+      "transcriptScrollContainer": "#engagement-panel-searchable-transcript, ytd-transcript-renderer #body, ytd-transcript-renderer",
+      "commentsSection": "ytd-comments#comments, #comments",
+      "commentThread": "ytd-comment-thread-renderer",
+      "commentText": "#content-text",
+      "commentAuthor": "#author-text span",
+      "commentPublishedTime": "a#published-time-text",
+      "commentLikeCount": "ytd-comment-action-buttons-renderer #vote-count-middle, #vote-count-middle",
+      "commentsSortMenuButton": "ytd-comments-header-renderer #sort-menu, #comments #sort-menu",
+      "commentsSortMenuItems": "tp-yt-paper-listbox tp-yt-paper-item, ytd-menu-service-item-renderer"
+    },
+    "youtube": {
+      "maxTopComments": 10,
+      "preferManualCaptions": true,
+      "expandDescription": true,
+      "setCommentsSortToTop": true
+    }
+  },
+  "controls": {
+    "items": [
+      {
+        "name": "Название видео",
+        "selectorKey": "videoTitle",
+        "description": "Заголовок видео на watch-странице (не Shorts).",
+        "actions": [
+          "readText"
+        ]
+      },
+      {
+        "name": "Описание (развернуть)",
+        "selectorKey": "descriptionExpandButton",
+        "description": "Кнопка разворачивания описания. Нужна, чтобы получить полный текст.",
+        "actions": [
+          "click",
+          "readText:descriptionText"
+        ]
+      },
+      {
+        "name": "Комментарии (секция)",
+        "selectorKey": "commentsSection",
+        "description": "Секция комментариев. Для загрузки требуется прокрутка до блока.",
+        "actions": [
+          "scrollIntoView",
+          "waitFor:commentThread"
+        ]
+      },
+      {
+        "name": "Сортировка комментариев",
+        "selectorKey": "commentsSortMenuButton",
+        "description": "Меню сортировки комментариев (Top/Newest). Для top-комментариев выбери «Top comments / Популярные».",
+        "actions": [
+          "click",
+          "selectMenuItem:Top comments"
+        ]
+      },
+      {
+        "name": "Субтитры / транскрипт",
+        "selectorKey": "transcriptOpenButton",
+        "description": "Субтитры/транскрипт извлекаются best-effort: 1) captionTracks → timedtext (json3/xml), 2) innertube youtubei/v1/get_transcript, 3) UI «Show transcript» → чтение ytd-transcript-segment-renderer. Используется для понимания содержания видео.",
+        "actions": [
+          "extractCaptionTracks",
+          "fetchTimedtextTranscript",
+          "fetchInnertubeTranscript",
+          "click",
+          "readText:transcriptSegment"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "agent-browser-workspace",
+  "version": "1.0.0",
+  "description": "Local browser toolkit for AI agents: deep research and browser use automation with local Chrome (CDP) + Playwright. Flexible, extensible scripts for web navigation, extraction and workflow automatization - built for reproducible research and agent-driven browsing.",
+  "main": "utils/browserUse.js",
+  "scripts": {
+    "extract": "node utils/getDataFromText.js",
+    "chrome": "node utils/browserUse.js --start",
+    "chrome:stop": "node utils/browserUse.js --shutdown"
+  },
+  "dependencies": {
+    "cheerio": "^1.2.0",
+    "turndown": "^7.2.2",
+    "unpdf": "^1.4.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.3.2"
+  }
+}
