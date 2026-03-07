@@ -10,8 +10,9 @@ const { initBrowser, parseBaseFlags, flagsToBrowserOptions, releaseBrowser, getR
  * Get both Markdown content (with images) and forms from the current
  * (or navigated-to) page in a single browser session.
  *
- * HTML is fetched once and shared between getContent and getForms
- * to avoid redundant requests.
+ * Site-specific controllers in getContent may need to wait/scroll before
+ * extraction, so forms are collected after content extraction from the
+ * settled page state.
  *
  * @param {object} options
  * @param {import('../utils/browserUse')} [options.browser]  Existing BrowserUse instance.
@@ -54,13 +55,10 @@ async function getAll(options = {}) {
       } catch { /* proceed if network doesn't idle */ }
     }
 
-    const html = await browser.getHtml();
-
     // IMPORTANT: do not access a shared browser instance concurrently.
     // Keep all browser operations strictly sequential.
     const contentResult = await getContent({
       browser,
-      html,
       dir,
       name,
       imageSubdir,
@@ -68,6 +66,8 @@ async function getAll(options = {}) {
       minHeight,
       downloadImages: true,
     });
+
+    const html = await browser.getHtml();
 
     const formsResult = await getForms({
       browser,

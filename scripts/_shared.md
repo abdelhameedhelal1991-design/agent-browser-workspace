@@ -128,16 +128,20 @@ await shutdownBrowser();             // port 9222 by default
 await shutdownBrowser({ port: 9333 });
 ```
 
-## Site profiles (`scripts/sites/*.json`)
+## Site profiles and controllers (`scripts/sites/*`)
 
-Site profiles let you move site-specific selector/control “hardcode” into JSON and reuse it across agents and scripts.
+Site profiles let you move site-specific selector/control “hardcode” into JSON and reuse it across agents and scripts.  
+If selectors alone are not enough, you can add an optional JS controller next to the JSON file for site-specific Markdown extraction / page preparation.
 
 ### Functions
 
 - `loadSiteProfiles()` — load all JSON profiles from `scripts/sites/` (cached).
+- `loadSiteControllers()` — load optional JS controllers from `scripts/sites/<id>.js` (cached).
 - `getSiteProfileById(id)` — get a profile by `id` (throws if not found).
 - `getSiteProfileForHost(host)` — select a profile by hostname (supports exact matches and masks like `*.example.com` / `.example.com`).
-- `getResolvedSiteInfoForUrl(url)` — return compact “site info” for a URL: `{ id, name, host, controls[] }`, where `controls[].selector` is resolved from `selectorKey` into an actual CSS selector.
+- `getSiteProfileForUrl(url)` — select a profile by full URL (host + optional `pathPrefixes`), which is safer for shared domains like `github.com`.
+- `getResolvedSiteInfoForUrl(url)` — return compact “site info” for a URL: `{ id, name, host, hasContentController, controls[] }`, where `controls[].selector` is resolved from `selectorKey` into an actual CSS selector.
+- `getSiteContextForUrl(url)` — resolve `{ profile, controller, site }` for scripts that need both config and JS extraction logic.
 
 ### Recommended profile structure
 
@@ -146,6 +150,7 @@ Site profiles let you move site-specific selector/control “hardcode” into JS
   "id": "google-search",
   "name": "Google Search",
   "hosts": ["google.com", "www.google.com"],
+  "pathPrefixes": ["/search"],
   "baseUrl": "https://www.google.com",
   "scraping": {
     "selectors": {
@@ -165,6 +170,18 @@ Site profiles let you move site-specific selector/control “hardcode” into JS
 }
 ```
 
+Optional controller:
+
+```javascript
+// scripts/sites/google-search.js
+module.exports = {
+  async preparePage(ctx) {},
+  async getMarkdown(ctx) {
+    return { mode: 'replace', markdown: '...' };
+  },
+};
+```
+
 ## Export
 
 ```javascript
@@ -176,9 +193,14 @@ module.exports = {
   shutdownBrowser,
   DEFAULT_CDP_ENDPOINT,   // 'http://localhost:9222'
   loadSiteProfiles,
+  loadSiteControllers,
   getSiteProfileById,
   getSiteProfileForHost,
+  getSiteProfileForUrl,
+  getSiteControllerById,
+  getSiteControllerForHost,
   getResolvedSiteInfoForUrl,
+  getSiteContextForUrl,
 };
 ```
 

@@ -10,12 +10,10 @@ const {
   flagsToBrowserOptions,
   releaseBrowser,
   getResolvedSiteInfoForUrl,
-  getSiteProfileForHost,
+  getSiteContextForUrl,
 } = require('./_shared');
 
 const MD_IMAGE_RE = /!\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
-
-const getContentYoutube = require('./getContentYoutube');
 
 /**
  * Get Markdown content of the current (or navigated-to) page,
@@ -36,7 +34,7 @@ const getContentYoutube = require('./getContentYoutube');
  * @param {boolean} [options.launch]        Force launch mode.
  * @param {boolean} [options.headless]      Headless mode.
  * @param {number}  [options.timeout]       Timeout.
- * @returns {Promise<{markdown: string, images: Array, savedTo: string, metadata: object, site?: object|null, youtube?: object|null}>}
+ * @returns {Promise<{markdown: string, images: Array, savedTo: string, metadata: object, site?: object|null, siteData?: object|null}>}
  */
 async function getContent(options = {}) {
   const {
@@ -111,8 +109,23 @@ async function getContent(options = {}) {
       }
     }
 
+    let initialPageUrl = browser.page ? browser.getUrl() : '';
+    let siteContext = getSiteContextForUrl(initialPageUrl);
+
+    if (!preloadedHtml && siteContext && siteContext.controller && typeof siteContext.controller.preparePage === 'function' && browser.page) {
+      await siteContext.controller.preparePage({
+        browser,
+        pageUrl: initialPageUrl,
+        profile: siteContext.profile,
+        timeoutMs: browserOptions.timeout,
+      });
+      initialPageUrl = browser.page ? browser.getUrl() : initialPageUrl;
+      siteContext = getSiteContextForUrl(initialPageUrl) || siteContext;
+    }
+
     const html = preloadedHtml || await browser.getHtml();
-    const pageUrl = browser.page ? browser.getUrl() : '';
+    const pageUrl = browser.page ? browser.getUrl() : initialPageUrl;
+    siteContext = getSiteContextForUrl(pageUrl) || siteContext;
 
     const data = getDataFromText(html);
 
@@ -120,12 +133,43 @@ async function getContent(options = {}) {
       .map(b => b.cssSelector)
       .filter(Boolean);
 
+    const genericMarkdownParts = data.content.map(block => block.markdown || '');
+    const genericMarkdown = genericMarkdownParts.filter(Boolean).join('\n\n');
+
     const imgSelector = contentSelectors.length > 0
       ? contentSelectors.map(s => `${s} img`).join(', ')
       : 'img';
 
+    let controllerData = null;
+    let controllerExtra = {};
+    let controllerSkipImageDownload = false;
+
+    let markdown = genericMarkdown;
+
+    if (siteContext && siteContext.controller && typeof siteContext.controller.getMarkdown === 'function' && browser.page) {
+      const controllerResult = await siteContext.controller.getMarkdown({
+        browser,
+        pageUrl,
+        html,
+        profile: siteContext.profile,
+        metadata: data.metadata,
+        data,
+        defaultMarkdown: markdown,
+        timeoutMs: browserOptions.timeout,
+      });
+
+      if (controllerResult && typeof controllerResult === 'object') {
+        markdown = applyControllerMarkdown(markdown, controllerResult);
+        controllerData = controllerResult.data || null;
+        controllerExtra = (controllerResult.extra && typeof controllerResult.extra === 'object')
+          ? controllerResult.extra
+          : {};
+        controllerSkipImageDownload = controllerResult.skipImageDownload === true;
+      }
+    }
+
     let images = [];
-    if (downloadImages && browser.page) {
+    if (downloadImages && browser.page && !(siteContext && siteContext.controller && siteContext.controller.skipImageDownload) && !controllerSkipImageDownload) {
       images = await browser.downloadImages({
         outputDir: absImageDir,
         selector: imgSelector,
@@ -136,36 +180,15 @@ async function getContent(options = {}) {
 
     const urlToLocal = buildImageMapping(images, absDir);
 
-    const markdownParts = data.content.map(block => {
+    const rewrittenMarkdownParts = data.content.map(block => {
       if (!block.markdown) return '';
       return replaceImageUrls(block.markdown, urlToLocal, pageUrl);
     });
-
-    let markdown = markdownParts.filter(Boolean).join('\n\n');
-
-    let youtube = null;
-    const siteProfile = (() => {
-      try {
-        const host = pageUrl ? new URL(pageUrl).hostname : '';
-        return host ? getSiteProfileForHost(host) : null;
-      } catch {
-        return null;
-      }
-    })();
-
-    if (siteProfile && siteProfile.id === 'youtube' && browser.page) {
-      const enrichment = await getContentYoutube({
-        browser,
-        pageUrl,
-        profile: siteProfile,
-        timeoutMs: browserOptions.timeout,
-      });
-      if (enrichment) {
-        youtube = enrichment.youtube || null;
-        if (enrichment.markdown) {
-          markdown = enrichment.markdown + (markdown ? `\n\n---\n\n${markdown}` : '');
-        }
-      }
+    const rewrittenGenericMarkdown = rewrittenMarkdownParts.filter(Boolean).join('\n\n');
+    if (rewrittenGenericMarkdown && markdown === genericMarkdown) {
+      markdown = rewrittenGenericMarkdown;
+    } else if (urlToLocal.size > 0 && markdown) {
+      markdown = replaceImageUrls(markdown, urlToLocal, pageUrl);
     }
 
     ensureDir(absDir);
@@ -177,7 +200,8 @@ async function getContent(options = {}) {
       savedTo: absFilePath,
       metadata: data.metadata,
       site: getResolvedSiteInfoForUrl(pageUrl),
-      ...(youtube ? { youtube } : {}),
+      ...(controllerData ? { siteData: controllerData } : {}),
+      ...controllerExtra,
     };
   } finally {
     await releaseBrowser(browser, ownsInstance);
@@ -233,6 +257,23 @@ function ensureDir(dirPath) {
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true });
   }
+}
+
+function applyControllerMarkdown(currentMarkdown, controllerResult) {
+  const provided = typeof controllerResult.markdown === 'string'
+    ? controllerResult.markdown.trim()
+    : '';
+  if (!provided) return currentMarkdown;
+
+  const mode = String(controllerResult.mode || 'replace').trim().toLowerCase();
+
+  if (mode === 'prepend') {
+    return `${provided}${currentMarkdown ? `\n\n---\n\n${currentMarkdown}` : ''}`;
+  }
+  if (mode === 'append') {
+    return `${currentMarkdown ? `${currentMarkdown}\n\n---\n\n` : ''}${provided}`;
+  }
+  return provided;
 }
 
 

@@ -73,6 +73,7 @@ The module can also be imported from Node.js, but the recommended interface is t
     "id": "google-search",
     "name": "Google Search",
     "host": "www.google.com",
+    "hasContentController": false,
     "controls": [
       {
         "name": "Search input",
@@ -89,10 +90,10 @@ The module can also be imported from Node.js, but the recommended interface is t
 ```
 Browser → getHtml()
        → getDataFromText(html) → content blocks + markdown
+       → (optional site controller from scripts/sites/<id>.js)
        → downloadImages({ selector: contentSelectors + ' img' })
        → build mapping: original URL → relative local path
        → replace image URLs in markdown
-       → (site enrichment, if host matches a profile in scripts/sites/*)
        → save .md file
 ```
 
@@ -104,12 +105,42 @@ Browser → getHtml()
 6. Download images via `browser.downloadImages()` into `dir/imageSubdir/`
 7. Build a mapping `originalURL → relativePath`
 8. Replace image URLs in Markdown with local paths (regex `![alt](url)`)
-9. Concatenate Markdown for all content blocks and save to file
-10. Release the browser
+9. If the page URL matches a site profile with a JS controller in `scripts/sites/<id>.js`, let the controller:
+   - optionally prepare the page (`preparePage`) for JS-heavy content / scrolling,
+   - optionally replace / prepend / append Markdown (`getMarkdown`),
+   - optionally disable image downloads for feed-like pages.
+10. Concatenate Markdown for all content blocks and save to file
+11. Release the browser
+
+## Site Controllers
+
+Site-specific extraction is split into two layers:
+
+- `scripts/sites/<id>.json` — selectors, controls, per-site config
+- `scripts/sites/<id>.js` — optional controller module
+
+If present, the controller can export:
+
+```js
+module.exports = {
+  skipImageDownload: true,
+  async preparePage(ctx) {},
+  async getMarkdown(ctx) {
+    return {
+      mode: 'replace', // or 'prepend' / 'append'
+      markdown: '...',
+      data: { items: [] },
+      extra: { youtube: {} }
+    };
+  }
+};
+```
+
+This is what powers source-specific Markdown for sites such as YouTube, Reddit, Gmail, Hacker News, AI Timelines, and similar feed/discussion pages.
 
 ## YouTube (content enrichment)
 
-If `getContent()` is called on a YouTube page (`youtube.com`, `youtu.be`) and the URL matches a watch page (not Shorts), the script additionally extracts and prepends to the Markdown output (implementation is in `scripts/getContentYoutube.js`):
+If `getContent()` is called on a YouTube page (`youtube.com`, `youtu.be`) and the URL matches a watch page (not Shorts), the YouTube site controller (`scripts/sites/youtube.js`, using `scripts/getContentYoutube.js`) additionally extracts and prepends to the Markdown output:
 
 - video title;
 - description (full text from `videoDetails.shortDescription`);

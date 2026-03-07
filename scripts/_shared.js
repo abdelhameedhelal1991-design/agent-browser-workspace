@@ -9,6 +9,7 @@ const CDP_PROBE_TIMEOUT = 3000;
 
 const SITES_DIR = path.join(__dirname, 'sites');
 let _siteProfilesCache = null;
+let _siteControllersCache = null;
 
 function normalizeHost(host) {
   return String(host || '').trim().toLowerCase();
@@ -22,6 +23,13 @@ function hostMatches(pattern, host) {
   if (p.startsWith('*.')) return h.endsWith(p.slice(1));
   if (p.startsWith('.')) return h.endsWith(p);
   return false;
+}
+
+function pathMatchesPrefix(pattern, pathname) {
+  const p = String(pattern || '').trim();
+  const pathValue = String(pathname || '').trim();
+  if (!p) return false;
+  return pathValue === p || pathValue.startsWith(p);
 }
 
 function loadSiteProfiles() {
@@ -68,6 +76,39 @@ function loadSiteProfiles() {
   return _siteProfilesCache;
 }
 
+function loadSiteControllers() {
+  if (_siteControllersCache) return _siteControllersCache;
+
+  const controllers = new Map();
+  const profiles = loadSiteProfiles();
+
+  for (const profile of profiles) {
+    if (!profile || !profile.id) continue;
+
+    const controllerPath = path.join(SITES_DIR, `${profile.id}.js`);
+    if (!fs.existsSync(controllerPath)) continue;
+
+    // Controllers are loaded lazily from the same directory as JSON profiles.
+    // This keeps selectors/config in JSON while allowing site-specific logic.
+    // Each controller may export either:
+    //   - a function (treated as getMarkdown)
+    //   - an object { preparePage?, getMarkdown?, skipImageDownload? }
+    const loaded = require(controllerPath);
+    const controller = typeof loaded === 'function'
+      ? { getMarkdown: loaded }
+      : loaded;
+
+    if (!controller || typeof controller !== 'object' || Array.isArray(controller)) {
+      throw new Error(`Invalid site controller shape: ${controllerPath}`);
+    }
+
+    controllers.set(profile.id, controller);
+  }
+
+  _siteControllersCache = controllers;
+  return _siteControllersCache;
+}
+
 function getSiteProfileById(id) {
   const wanted = String(id || '').trim();
   if (!wanted) throw new Error('Site profile id is required.');
@@ -95,6 +136,51 @@ function getSiteProfileForHost(host) {
   return null;
 }
 
+function getSiteProfileForUrl(url) {
+  const raw = String(url || '').trim();
+  if (!raw) return null;
+
+  let parsed;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    return null;
+  }
+
+  const host = normalizeHost(parsed.hostname);
+  const pathname = parsed.pathname || '/';
+
+  const profiles = loadSiteProfiles();
+  for (const profile of profiles) {
+    if (!Array.isArray(profile.hosts) || profile.hosts.length === 0) continue;
+    if (!profile.hosts.some(p => hostMatches(p, host))) continue;
+
+    const pathPrefixes = Array.isArray(profile.pathPrefixes)
+      ? profile.pathPrefixes.map(String).filter(Boolean)
+      : [];
+
+    if (pathPrefixes.length > 0 && !pathPrefixes.some(prefix => pathMatchesPrefix(prefix, pathname))) {
+      continue;
+    }
+
+    return profile;
+  }
+
+  return null;
+}
+
+function getSiteControllerById(id) {
+  const wanted = String(id || '').trim();
+  if (!wanted) throw new Error('Site controller id is required.');
+  return loadSiteControllers().get(wanted) || null;
+}
+
+function getSiteControllerForHost(host) {
+  const profile = getSiteProfileForHost(host);
+  if (!profile || !profile.id) return null;
+  return getSiteControllerById(profile.id);
+}
+
 function getResolvedSiteInfoForUrl(url) {
   const raw = String(url || '').trim();
   if (!raw) return null;
@@ -106,7 +192,7 @@ function getResolvedSiteInfoForUrl(url) {
     return null;
   }
 
-  const profile = getSiteProfileForHost(host);
+  const profile = getSiteProfileForUrl(raw);
   if (!profile) return null;
 
   const selectors = (profile.scraping && typeof profile.scraping === 'object')
@@ -134,6 +220,28 @@ function getResolvedSiteInfoForUrl(url) {
     name: profile.name != null ? String(profile.name) : '',
     host: normalizeHost(host),
     controls,
+    hasContentController: !!getSiteControllerById(profile.id),
+  };
+}
+
+function getSiteContextForUrl(url) {
+  const raw = String(url || '').trim();
+  if (!raw) return null;
+
+  let host = '';
+  try {
+    host = new URL(raw).hostname || '';
+  } catch {
+    return null;
+  }
+
+  const profile = getSiteProfileForUrl(raw);
+  if (!profile) return null;
+
+  return {
+    profile,
+    controller: getSiteControllerById(profile.id),
+    site: getResolvedSiteInfoForUrl(raw),
   };
 }
 
@@ -282,7 +390,12 @@ module.exports = {
   shutdownBrowser,
   DEFAULT_CDP_ENDPOINT,
   loadSiteProfiles,
+  loadSiteControllers,
   getSiteProfileById,
   getSiteProfileForHost,
+  getSiteProfileForUrl,
+  getSiteControllerById,
+  getSiteControllerForHost,
   getResolvedSiteInfoForUrl,
+  getSiteContextForUrl,
 };

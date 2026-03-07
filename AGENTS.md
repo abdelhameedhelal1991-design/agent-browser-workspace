@@ -164,12 +164,19 @@ Browser initialization across scripts is centralized in [`scripts/_shared`](scri
 
 ### Site profile enrichment in responses (`site`)
 
-Scripts `getContent`, `getForms`, `getAll` return a `site` field (if the page host matches a profile in `scripts/sites/*.json`).  
+Scripts `getContent`, `getForms`, `getAll` return a `site` field (if the page URL matches a profile in `scripts/sites/*.json`).  
 If `site` is present — include `site.controls` (selector + description + actions) in your agent/user response. This speeds up further work with the site and reduces “guessing” selectors.
 
 ## Site profiles (`scripts/sites`)
 
-Selectors and “controls” for specific sites live in JSON under `scripts/sites/`. This allows agents to “remember” important UI elements (e.g. Google SERP) and reuse them without hardcoding in code or prompts. See [`scripts/_shared`](scripts/_shared.md) for details.
+Selectors and “controls” for specific sites live in JSON under `scripts/sites/`. This allows agents to “remember” important UI elements (e.g. Google SERP) and reuse them without hardcoding in code or prompts.  
+
+If a site needs custom Markdown extraction beyond generic HTML parsing, add an optional JS controller next to the JSON profile:
+
+- `scripts/sites/<id>.json` — selectors, controls, config
+- `scripts/sites/<id>.js` — optional controller with `preparePage()` / `getMarkdown()`
+
+`getContent` now uses these controllers automatically when the page URL matches the profile, so site-specific list pages / feeds / SPAs can return useful Markdown instead of raw boilerplate.
 
 ## Reliable content extraction from pages
 

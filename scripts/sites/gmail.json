@@ -1,0 +1,67 @@
+{
+  "id": "gmail",
+  "name": "Gmail",
+  "hosts": [
+    "mail.google.com"
+  ],
+  "baseUrl": "https://mail.google.com/mail/u/0/#inbox",
+  "scraping": {
+    "selectors": {
+      "emailRow": "tr.zA",
+      "sender": ".yW .zF, .yW .yP",
+      "subject": ".bog, .bqe",
+      "snippet": ".y2",
+      "messageSubject": "h2.hP",
+      "messageBody": ".a3s.aiL, .ii.gt div, .a3s",
+      "messageLinks": ".a3s.aiL a[href], .ii.gt div a[href], .a3s a[href]"
+    },
+    "gmail": {
+      "newsletterKeywords": [
+        "TLDR",
+        "Rundown",
+        "Latent.Space",
+        "latent space",
+        "Superhuman",
+        "Neuron",
+        "Ben's Bites",
+        "bensbites",
+        "Import AI",
+        "DeepLearning",
+        "AlphaSignal",
+        "Hugging Face",
+        "huggingface",
+        "daily papers",
+        "Yutori"
+      ]
+    }
+  },
+  "controls": {
+    "items": [
+      {
+        "name": "Строки писем",
+        "selectorKey": "emailRow",
+        "description": "Строки писем во входящих Gmail.",
+        "actions": [
+          "readText",
+          "click"
+        ]
+      },
+      {
+        "name": "Тема открытого письма",
+        "selectorKey": "messageSubject",
+        "description": "Заголовок открытого письма.",
+        "actions": [
+          "readText"
+        ]
+      },
+      {
+        "name": "Тело письма",
+        "selectorKey": "messageBody",
+        "description": "Основной HTML-текст открытого письма.",
+        "actions": [
+          "readText"
+        ]
+      }
+    ]
+  }
+}
