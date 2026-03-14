@@ -41,14 +41,15 @@ We use **DeepResearch Bench (DRB)** as the main external benchmark for deep rese
 
 As measured on DRB (RACE overall), the reference points are:
 
-| System | DRB overall |
-|---|---:|
-| Gemini-2.5-Pro Deep Research | **48.88** |
-| OpenAI Deep Research | **46.98** |
-| **Agent Browser Workspace (this repo)** | **44.37** *(submission pending review)* |
-| Perplexity Deep Research | **42.25** |
+| System                                  |                             DRB overall |
+| --------------------------------------- | --------------------------------------: |
+| Gemini-2.5-Pro Deep Research            |                               **48.88** |
+| OpenAI Deep Research                    |                               **46.98** |
+| **Agent Browser Workspace (this repo)** | **44.37** _(submission pending review)_ |
+| Perplexity Deep Research                |                               **42.25** |
 
 **Important context:**
+
 - Our **44.37** result was produced using **Claude Haiku 4.5** (significantly cheaper than frontier “deep research” stacks) and a **Cursor-based agent**. Results were submitted to the leaderboard and are currently under review.
 - Claude Haiku 4.5 is designed for low-latency, cost-effective agentic workloads (see [Anthropic announcement](https://www.anthropic.com/news/claude-haiku-4-5)).
 
@@ -116,6 +117,7 @@ The Node.js API exists primarily for **authoring/extending tools**. For normal t
 ## Extending: add a site profile
 
 Site profiles live in `scripts/sites/*.json`. A profile can define:
+
 - `scraping.selectors` — named selectors used by scripts
 - `controls.items` — “UI controls” (selectorKey + human-readable actions) that scripts expose back as `site.controls`
 
@@ -154,7 +156,7 @@ Parallelize only non-browser work (e.g., parsing raw HTML via `getDataFromText`)
 
 ## Docs
 
-- [AGENTS.md](AGENTS.md) — tools overview, usage rules, escalation strategy for JS-heavy pages, PDF handling
+- [AGENT_BROWSER.md](AGENT_BROWSER.md) — tools overview, usage rules, escalation strategy for JS-heavy pages, PDF handling
 - [INSTALLATION.md](INSTALLATION.md) — setup, Chrome profile, QoL shortcuts
 - [RESEARCH.md](RESEARCH.md) — deep research methodology (artifacts, phases, quality checklist)
 - `scripts/` — high-level scripts documentation:
@@ -169,6 +171,7 @@ Parallelize only non-browser work (e.g., parsing raw HTML via `getDataFromText`)
 ## Contributing
 
 PRs are welcome — especially:
+
 - new/updated site profiles in `scripts/sites/`
 - extractor improvements for tricky pages (SPA, lazy-load, paywalls/overlays)
 - better heuristics for form classification and content block selection
@@ -176,4 +179,3 @@ PRs are welcome — especially:
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE).
-

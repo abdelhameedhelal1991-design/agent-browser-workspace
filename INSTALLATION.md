@@ -1,3 +1,17 @@
+---
+title: Installation and setup
+description: >
+  How to install dependencies (Node.js, Playwright, Chrome), configure Chrome for automation
+  with an isolated AgentProfile, start/stop background Chrome with CDP, create a Windows shortcut,
+  and verify the setup. Covers macOS/Linux/Windows, custom profiles, and profile paths.
+when_to_read: >
+  Read when you need to install the project, set up Chrome for the first time, troubleshoot
+  connection issues, switch Chrome profiles, or configure CDP on a non-default port.
+related:
+  - AGENT_BROWSER.md
+  - utils/browserUse.md
+---
+
 # Installation and setup
 
 ## Requirements
@@ -81,11 +95,11 @@ By default the `AgentProfile` profile is used. A profile is a separate Chrome da
 
 Default profile paths:
 
-| OS | Path |
-|----|------|
-| Windows | `%LOCALAPPDATA%\Google\Chrome\AgentProfile` |
-| macOS | `~/Library/Application Support/Google/Chrome/AgentProfile` |
-| Linux | `~/.config/google-chrome/AgentProfile` |
+| OS      | Path                                                       |
+| ------- | ---------------------------------------------------------- |
+| Windows | `%LOCALAPPDATA%\Google\Chrome\AgentProfile`                |
+| macOS   | `~/Library/Application Support/Google/Chrome/AgentProfile` |
+| Linux   | `~/.config/google-chrome/AgentProfile`                     |
 
 To use another profile:
 
@@ -116,9 +130,8 @@ npm run chrome:stop
 
 ## Documentation
 
-- [AGENTS.md](AGENTS.md) — overview of all tools and when to use what
+- [AGENT_BROWSER.md](AGENT_BROWSER.md) — overview of all tools and when to use what
 - [utils/browserUse.md](utils/browserUse.md) — Chrome control (API + CLI)
 - [utils/getDataFromText.md](utils/getDataFromText.md) — extract data from HTML
 - [scripts/](scripts/) — high-level scripts (getContent, getForms, getAll, googleSearch)
 - [RESEARCH.md](RESEARCH.md) — deep-research methodology via Google Search
-

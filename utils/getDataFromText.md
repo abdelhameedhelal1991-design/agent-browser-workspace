@@ -1,8 +1,28 @@
+---
+title: "getDataFromText — HTML to structured data"
+description: >
+  Cascade extractor for structural blocks from raw HTML (no browser required): navigation,
+  main content, and forms. Uses 5-tier detection cascades (semantic tags → ARIA → CSS classes →
+  regex → scoring) with Readability-like fallback. Converts content to Markdown via Turndown.
+  Form classification: auth, search, filter, contact, subscribe, generic. Includes content
+  cleaning (noise removal, link-dense block filtering).
+when_to_read: >
+  Read when you need to extract structured data from HTML without a browser, understand how
+  content/navigation/form detection works (tiers, scoring, fallback), customize extraction
+  via API options, or parse raw HTML files from disk.
+provides:
+  cli: "node utils/getDataFromText.js <input.html> [output.json] [--raw]"
+  api: "getDataFromText(html, options) → { metadata, navigation, content, forms }"
+related:
+  - utils/browserUse.md
+  - AGENT_BROWSER.md
+---
+
 # get-data-from-text
 
 Cascade extractor for structural blocks from HTML pages: navigation, main content, forms. Extracted blocks are converted to Markdown via [Turndown](https://github.com/mixmark-io/turndown).
 
-> **CLI-first.** Prefer using the CLI (`node utils/getDataFromText.js ...`) for tasks. The API is intended for tool authors and advanced integrations. See `AGENTS.md` for the policy.
+> **CLI-first.** Prefer using the CLI (`node utils/getDataFromText.js ...`) for tasks. The API is intended for tool authors and advanced integrations. See `AGENT_BROWSER.md` for the policy.
 
 ## Install
 
@@ -139,26 +159,26 @@ HTML ─→ Parse (cheerio)
 
 ### Navigation (5 tiers)
 
-| Tier | Method | Examples |
-| ---- | ------ | -------- |
-| 1 | Semantic tags / ARIA | `<nav>`, `[role="navigation"]` |
-| 2 | CSS classes | `.nav`, `.menu`, `.navbar`, `.main-menu` |
-| 3 | CSS IDs | `#nav`, `#navigation`, `#menu` |
-| 4 | Regex class/id + structural | `header > ul` with many links |
-| 5 | Statistical | link density > 0.5, link count > 3, avg anchor ≤ 4 words |
+| Tier | Method                      | Examples                                                 |
+| ---- | --------------------------- | -------------------------------------------------------- |
+| 1    | Semantic tags / ARIA        | `<nav>`, `[role="navigation"]`                           |
+| 2    | CSS classes                 | `.nav`, `.menu`, `.navbar`, `.main-menu`                 |
+| 3    | CSS IDs                     | `#nav`, `#navigation`, `#menu`                           |
+| 4    | Regex class/id + structural | `header > ul` with many links                            |
+| 5    | Statistical                 | link density > 0.5, link count > 3, avg anchor ≤ 4 words |
 
 Subtypes: `primary_nav`, `footer_nav`, `breadcrumbs`, `toc`, `pagination`.
 
 ### Content (5 tiers + fallback)
 
-| Tier | Method | Examples |
-| ---- | ------ | -------- |
-| 1 | Semantic tags / ARIA | `<main>`, `[role="main"]` |
-| 2 | Article | `<article>` |
-| 3 | Microdata | `[itemprop="articleBody"]` |
-| 4 | CSS classes | `.content`, `.entry-content`, `.post-content` |
-| 5 | CSS IDs | `#content`, `#main-content`, `#main` |
-| 6 | Readability scoring | heuristics: text, commas, link density, class weights |
+| Tier | Method               | Examples                                              |
+| ---- | -------------------- | ----------------------------------------------------- |
+| 1    | Semantic tags / ARIA | `<main>`, `[role="main"]`                             |
+| 2    | Article              | `<article>`                                           |
+| 3    | Microdata            | `[itemprop="articleBody"]`                            |
+| 4    | CSS classes          | `.content`, `.entry-content`, `.post-content`         |
+| 5    | CSS IDs              | `#content`, `#main-content`, `#main`                  |
+| 6    | Readability scoring  | heuristics: text, commas, link density, class weights |
 
 The scoring fallback is a simplified Readability.js-like algorithm: tag base score, class weights (+25/-25), link density penalty (`score *= 1 - ld`), parent/grandparent propagation.
 
@@ -166,12 +186,12 @@ If scoring doesn’t reach `MIN_EXTRACTED_SIZE` (250 chars) — baseline fallbac
 
 ### Forms (4 tiers)
 
-| Tier | Method | Examples |
-| ---- | ------ | -------- |
-| 1 | Semantic tags / ARIA | `<form>`, `[role="search"]`, `[role="form"]` |
-| 2 | CSS classes / IDs | `.login-form`, `.search-box`, `.filters`, `.contact-form` |
-| 3 | Regex class/id | boundary-aware regex for form patterns |
-| 4 | Structural | containers with `input` + `button` without `<form>` |
+| Tier | Method               | Examples                                                  |
+| ---- | -------------------- | --------------------------------------------------------- |
+| 1    | Semantic tags / ARIA | `<form>`, `[role="search"]`, `[role="form"]`              |
+| 2    | CSS classes / IDs    | `.login-form`, `.search-box`, `.filters`, `.contact-form` |
+| 3    | Regex class/id       | boundary-aware regex for form patterns                    |
+| 4    | Structural           | containers with `input` + `button` without `<form>`       |
 
 Form types: `auth`, `search`, `filter`, `contact`, `subscribe`, `generic`.
 
@@ -190,26 +210,25 @@ Inside extracted content blocks, the following are removed:
 
 Settings from `config-turndown`:
 
-| Setting | Value |
+| Setting          | Value                  |
 | ---------------- | ---------------------- |
-| Heading style | `atx` (`#`, `##`, ...) |
-| Horizontal rule | `---` |
-| Bullet | `-` |
-| Code block style | `fenced` (````` ``) |
-| Em delimiter | `_` |
-| Strong delimiter | `**` |
-| Link style | `inlined` |
+| Heading style    | `atx` (`#`, `##`, ...) |
+| Horizontal rule  | `---`                  |
+| Bullet           | `-`                    |
+| Code block style | `fenced` (```` `)      |
+| Em delimiter     | `_`                    |
+| Strong delimiter | `**`                   |
+| Link style       | `inlined`              |
 
 ## API options
 
-| Option | Type | Default | Description |
-| ------------ | --------- | ------------ | ------------ |
-| `inputType` | `'file'` | auto | Force reading input as a file path |
-| `outputFile` | `string` | — | Path to save JSON output |
-| `raw` | `boolean` | `false` | Do not convert to Markdown (HTML blocks only) |
+| Option       | Type      | Default | Description                                   |
+| ------------ | --------- | ------- | --------------------------------------------- |
+| `inputType`  | `'file'`  | auto    | Force reading input as a file path            |
+| `outputFile` | `string`  | —       | Path to save JSON output                      |
+| `raw`        | `boolean` | `false` | Do not convert to Markdown (HTML blocks only) |
 
 ## Dependencies
 
 - [cheerio](https://github.com/cheeriojs/cheerio) — server-side DOM parser
 - [turndown](https://github.com/mixmark-io/turndown) — HTML → Markdown converter
-

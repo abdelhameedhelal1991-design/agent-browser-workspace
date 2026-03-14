@@ -1,8 +1,26 @@
+---
+title: "getAll — content + forms in one call"
+description: >
+  Combines getContent and getForms into a single browser session with one HTML snapshot.
+  Returns Markdown content with local images and classified forms with fields — avoiding
+  a second browser round-trip. CLI and API interfaces.
+when_to_read: >
+  Read when you need both page content (Markdown + images) and form data in a single efficient
+  call, or when you want to understand how the shared HTML snapshot optimization works.
+provides:
+  cli: "node scripts/getAll.js --dir <dir> --name <file> [--url <url>] [--forms-output <file>]"
+  api: "getAll({ dir, name, url, formsOutput, ... })"
+related:
+  - scripts/getContent.md
+  - scripts/getForms.md
+  - scripts/_shared.md
+---
+
 # getAll
 
 Combine [getContent](./getContent.md) and [getForms](./getForms.md) into a single call. One browser session, one HTML snapshot — both results: Markdown content with local images and classified forms with fields.
 
-> **CLI-first.** Use this tool via CLI unless you are authoring new tooling. See `AGENTS.md` for the policy and escalation guidance.
+> **CLI-first.** Use this tool via CLI unless you are authoring new tooling. See `AGENT_BROWSER.md` for the policy and escalation guidance.
 
 ## Quick start
 
@@ -29,20 +47,20 @@ The module can also be imported from Node.js, but the recommended interface is t
 
 Accepts all options from `getContent` and `getForms`, plus:
 
-| Option | Type | Default | Description |
-|-------|-----|---------|-------------|
-| `dir` | `string` | **required** | Output directory for the Markdown file |
-| `name` | `string` | **required** | Markdown filename |
-| `url` | `string` | `null` | URL to navigate to |
-| `imageSubdir` | `string` | `'images'` | Images subdirectory |
-| `minWidth` | `number` | `100` | Minimum image width (px) |
-| `minHeight` | `number` | `100` | Minimum image height (px) |
-| `formsOutput` | `string` | `null` | Path to save forms JSON (`{ forms, metadata, site }`) |
-| `browser` | `BrowserUse` | `null` | Existing browser instance |
-| `cdp` | `boolean\|string` | — | CDP mode |
-| `launch` | `boolean` | — | Force launch mode |
-| `headless` | `boolean` | `false` | Headless |
-| `timeout` | `number` | `30000` | Timeout |
+| Option        | Type              | Default      | Description                                           |
+| ------------- | ----------------- | ------------ | ----------------------------------------------------- |
+| `dir`         | `string`          | **required** | Output directory for the Markdown file                |
+| `name`        | `string`          | **required** | Markdown filename                                     |
+| `url`         | `string`          | `null`       | URL to navigate to                                    |
+| `imageSubdir` | `string`          | `'images'`   | Images subdirectory                                   |
+| `minWidth`    | `number`          | `100`        | Minimum image width (px)                              |
+| `minHeight`   | `number`          | `100`        | Minimum image height (px)                             |
+| `formsOutput` | `string`          | `null`       | Path to save forms JSON (`{ forms, metadata, site }`) |
+| `browser`     | `BrowserUse`      | `null`       | Existing browser instance                             |
+| `cdp`         | `boolean\|string` | —            | CDP mode                                              |
+| `launch`      | `boolean`         | —            | Force launch mode                                     |
+| `headless`    | `boolean`         | `false`      | Headless                                              |
+| `timeout`     | `number`          | `30000`      | Timeout                                               |
 
 ### Result shape
 
@@ -50,7 +68,12 @@ Accepts all options from `getContent` and `getForms`, plus:
 {
   "markdown": "# Page title\n\nText...\n\n![Photo](images/photo.jpg)",
   "images": [
-    { "src": "https://...", "savedAs": "/abs/path/...", "success": true, "size": 12345 }
+    {
+      "src": "https://...",
+      "savedAs": "/abs/path/...",
+      "success": true,
+      "size": 12345
+    }
   ],
   "savedTo": "/abs/path/output/article.md",
   "forms": [
@@ -58,7 +81,9 @@ Accepts all options from `getContent` and `getForms`, plus:
       "type": "search",
       "selector": "[role=\"search\"]",
       "confidence": 0.95,
-      "fields": [{ "tag": "input", "type": "text", "name": "q", "selector": "..." }]
+      "fields": [
+        { "tag": "input", "type": "text", "name": "q", "selector": "..." }
+      ]
     }
   ],
   "metadata": {
@@ -129,11 +154,10 @@ node scripts/getAll.js --cdp http://localhost:9222 --url https://example.com --d
 
 ## Writing custom scripts (last resort)
 
-If you need multi-step interactions not supported by the CLI (login flows, infinite scroll, complex UI state), consider a minimal script that composes `utils/browserUse` + `scripts/getAll` API. Do this only when you are confident in the site structure/selectors. See `AGENTS.md` for the policy.
+If you need multi-step interactions not supported by the CLI (login flows, infinite scroll, complex UI state), consider a minimal script that composes `utils/browserUse` + `scripts/getAll` API. Do this only when you are confident in the site structure/selectors. See `AGENT_BROWSER.md` for the policy.
 
 ## Dependencies
 
-- [_shared](./_shared.md) — browser initialization
+- [\_shared](./_shared.md) — browser initialization
 - [getContent](./getContent.md) — content extraction
 - [getForms](./getForms.md) — form extraction
-

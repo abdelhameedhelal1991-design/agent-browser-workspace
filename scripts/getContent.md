@@ -1,8 +1,29 @@
+---
+title: "getContent — page to Markdown"
+description: >
+  Extract Markdown content from a browser page, download images, rewrite image links to local paths,
+  and save the result to a file. Supports site-specific controllers (scripts/sites/*.js) for custom
+  extraction (YouTube transcripts/comments, feed pages). Handles PDFs automatically via getPdfText().
+  CLI and API interfaces.
+when_to_read: >
+  Read when you need to save a web page as Markdown with images, extract content from a URL or
+  the current browser tab, understand the image download pipeline, use site controllers for
+  YouTube/Reddit/etc., or work with the getContent API options and result shape.
+provides:
+  cli: "node scripts/getContent.js --dir <dir> --name <file> [--url <url>]"
+  api: "getContent({ dir, name, url, ... })"
+related:
+  - scripts/_shared.md
+  - utils/browserUse.md
+  - utils/getDataFromText.md
+  - AGENT_BROWSER.md
+---
+
 # getContent
 
 Extract Markdown content from the current (or specified) browser page. Downloads images from content blocks and rewrites Markdown image links to local paths. Saves the result to a file.
 
-> **CLI-first.** Use this tool via CLI unless you are authoring new tooling. See `AGENTS.md` for the policy and escalation guidance.
+> **CLI-first.** Use this tool via CLI unless you are authoring new tooling. See `AGENT_BROWSER.md` for the policy and escalation guidance.
 
 ## Quick start
 
@@ -27,21 +48,21 @@ The module can also be imported from Node.js, but the recommended interface is t
 
 ### `getContent(options)`
 
-| Option | Type | Default | Description |
-|-------|-----|---------|-------------|
-| `dir` | `string` | **required** | Output directory for the Markdown file |
-| `name` | `string` | **required** | Markdown filename |
-| `url` | `string` | `null` | URL to navigate to (`null` = current page) |
-| `imageSubdir` | `string` | `'images'` | Images subdirectory (relative to `dir`) |
-| `minWidth` | `number` | `100` | Skip images narrower than this (px) |
-| `minHeight` | `number` | `100` | Skip images shorter than this (px) |
-| `browser` | `BrowserUse` | `null` | Existing browser instance to reuse |
-| `html` | `string` | `null` | Pre-fetched HTML (skips `browser.getHtml()`) |
-| `downloadImages` | `boolean` | `true` if `html` is not passed | If `html` is passed, controls whether images are still downloaded from the DOM |
-| `cdp` | `boolean\|string` | — | CDP mode |
-| `launch` | `boolean` | — | Force launch mode |
-| `headless` | `boolean` | `false` | Headless |
-| `timeout` | `number` | `30000` | Timeout |
+| Option           | Type              | Default                        | Description                                                                    |
+| ---------------- | ----------------- | ------------------------------ | ------------------------------------------------------------------------------ |
+| `dir`            | `string`          | **required**                   | Output directory for the Markdown file                                         |
+| `name`           | `string`          | **required**                   | Markdown filename                                                              |
+| `url`            | `string`          | `null`                         | URL to navigate to (`null` = current page)                                     |
+| `imageSubdir`    | `string`          | `'images'`                     | Images subdirectory (relative to `dir`)                                        |
+| `minWidth`       | `number`          | `100`                          | Skip images narrower than this (px)                                            |
+| `minHeight`      | `number`          | `100`                          | Skip images shorter than this (px)                                             |
+| `browser`        | `BrowserUse`      | `null`                         | Existing browser instance to reuse                                             |
+| `html`           | `string`          | `null`                         | Pre-fetched HTML (skips `browser.getHtml()`)                                   |
+| `downloadImages` | `boolean`         | `true` if `html` is not passed | If `html` is passed, controls whether images are still downloaded from the DOM |
+| `cdp`            | `boolean\|string` | —                              | CDP mode                                                                       |
+| `launch`         | `boolean`         | —                              | Force launch mode                                                              |
+| `headless`       | `boolean`         | `false`                        | Headless                                                                       |
+| `timeout`        | `number`          | `30000`                        | Timeout                                                                        |
 
 ### Result shape
 
@@ -127,12 +148,12 @@ module.exports = {
   async preparePage(ctx) {},
   async getMarkdown(ctx) {
     return {
-      mode: 'replace', // or 'prepend' / 'append'
-      markdown: '...',
+      mode: "replace", // or 'prepend' / 'append'
+      markdown: "...",
       data: { items: [] },
-      extra: { youtube: {} }
+      extra: { youtube: {} },
     };
-  }
+  },
 };
 ```
 
@@ -189,11 +210,10 @@ node scripts/getContent.js --url "https://www.youtube.com/watch?v=VIDEO_ID" --di
 
 ## Writing custom scripts (last resort)
 
-If you need multi-step interactions not supported by the CLI (login flows, infinite scroll, complex UI state), consider a minimal script that composes `utils/browserUse` + `scripts/getContent` API. Do this only when you are confident in the site structure/selectors. See `AGENTS.md` for the policy.
+If you need multi-step interactions not supported by the CLI (login flows, infinite scroll, complex UI state), consider a minimal script that composes `utils/browserUse` + `scripts/getContent` API. Do this only when you are confident in the site structure/selectors. See `AGENT_BROWSER.md` for the policy.
 
 ## Dependencies
 
-- [_shared](./_shared.md) — browser initialization
+- [\_shared](./_shared.md) — browser initialization
 - [browserUse](../utils/browserUse.md) — Chrome control
 - [getDataFromText](../utils/getDataFromText.md) — extract content from HTML
-

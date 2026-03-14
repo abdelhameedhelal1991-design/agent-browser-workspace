@@ -1,8 +1,30 @@
+---
+title: "googleSearch — Google Search automation"
+description: >
+  Step-by-step Google Search control: run a search, collect organic links (ads filtered),
+  open results in new tabs, extract content via getContent, paginate. Saves stable SERP
+  snapshots to links.json for resumable research. Anchor-first link extraction resilient to
+  Google markup changes. CLI and API (GoogleSearch class) interfaces.
+when_to_read: >
+  Read when you need to automate Google Search, collect search result links, iterate over
+  results and extract content, understand the links.json format, use pagination, or
+  troubleshoot link extraction when Google changes its markup.
+provides:
+  cli: "node scripts/googleSearch.js \"<query>\" [--links] [--open <n>] [--dir <dir>] [--name <file>]"
+  api: "new GoogleSearch(options) → init/search/getLinks/openLink/getContent/closeTab/goToPage/close"
+related:
+  - scripts/getContent.md
+  - scripts/getForms.md
+  - scripts/_shared.md
+  - utils/browserUse.md
+  - RESEARCH.md
+---
+
 # googleSearch
 
 `GoogleSearch` is a class for step-by-step control of Google Search. Each operation is a separate method: run a search, collect links (without ads), open a result in a new tab, extract content, return to results, paginate.
 
-> **CLI-first.** Use the CLI interface for agent tasks. The API is intended for tool authors and advanced integrations. See `AGENTS.md` for the policy.
+> **CLI-first.** Use the CLI interface for agent tasks. The API is intended for tool authors and advanced integrations. See `AGENT_BROWSER.md` for the policy.
 
 ## Quick start
 
@@ -34,21 +56,21 @@ The class can also be used programmatically from Node.js, but the recommended in
 const google = new GoogleSearch(options);
 ```
 
-| Option | Type | Default | Description |
-|-------|-----|---------|-------------|
-| `browser` | `BrowserUse` | `null` | Existing browser instance |
-| `cdp` | `boolean\|string` | — | CDP mode |
-| `launch` | `boolean` | — | Force launch mode |
-| `headless` | `boolean` | `false` | Headless |
-| `timeout` | `number` | `30000` | Timeout |
-| `linksDir` | `string` | `null` | If set — `getLinks()` appends results to `<linksDir>/links.json` |
+| Option     | Type              | Default | Description                                                      |
+| ---------- | ----------------- | ------- | ---------------------------------------------------------------- |
+| `browser`  | `BrowserUse`      | `null`  | Existing browser instance                                        |
+| `cdp`      | `boolean\|string` | —       | CDP mode                                                         |
+| `launch`   | `boolean`         | —       | Force launch mode                                                |
+| `headless` | `boolean`         | `false` | Headless                                                         |
+| `timeout`  | `number`          | `30000` | Timeout                                                          |
+| `linksDir` | `string`          | `null`  | If set — `getLinks()` appends results to `<linksDir>/links.json` |
 
 ### Properties
 
-| Property | Type | Description |
-|----------|-----|-------------|
-| `browser` | `BrowserUse` | Current browser instance |
-| `links` | `Array` | Last parsed list of links |
+| Property  | Type         | Description               |
+| --------- | ------------ | ------------------------- |
+| `browser` | `BrowserUse` | Current browser instance  |
+| `links`   | `Array`      | Last parsed list of links |
 
 ### Methods
 
@@ -66,12 +88,12 @@ await google.init();
 Opens Google, types the query, presses Enter. Waits for the results page to load.
 
 ```javascript
-await google.search('playwright tutorial');
+await google.search("playwright tutorial");
 ```
 
-| Parameter | Type | Description |
-|----------|-----|-------------|
-| `query` | `string` | Search query |
+| Parameter         | Type     | Description             |
+| ----------------- | -------- | ----------------------- |
+| `query`           | `string` | Search query            |
 | `options.timeout` | `number` | Navigation timeout (ms) |
 
 #### `getSearchForm()`
@@ -105,11 +127,11 @@ const links = await google.getLinks();
 
 Result item format:
 
-| Field | Type | Description |
-|------|-----|-------------|
-| `index` | `number` | Index (0-based) |
-| `title` | `string` | Result title |
-| `url` | `string` | Target URL |
+| Field     | Type     | Description           |
+| --------- | -------- | --------------------- |
+| `index`   | `number` | Index (0-based)       |
+| `title`   | `string` | Result title          |
+| `url`     | `string` | Target URL            |
 | `snippet` | `string` | Snippet / description |
 
 ##### `links.json` (stable SERP snapshot)
@@ -145,13 +167,13 @@ Opens the n-th link from `getLinks()` in a new tab and switches to it. Remembers
 
 ```javascript
 const { url, isPdf } = await google.openLink(0);
-if (isPdf) console.log('PDF will be handled via getContent()');
+if (isPdf) console.log("PDF will be handled via getContent()");
 ```
 
-| Parameter | Type | Description |
-|----------|-----|-------------|
-| `n` | `number` | Link index (0-based) |
-| `options.timeout` | `number` | Navigation timeout |
+| Parameter         | Type     | Description          |
+| ----------------- | -------- | -------------------- |
+| `n`               | `number` | Link index (0-based) |
+| `options.timeout` | `number` | Navigation timeout   |
 
 Returns: `{ url: string, isPdf: boolean }`
 
@@ -163,20 +185,20 @@ Extracts Markdown content for the current active tab. Delegates to [getContent](
 
 ```javascript
 const result = await google.getContent({
-  dir: './output',
-  name: 'article.md',
-  imageSubdir: 'images',
+  dir: "./output",
+  name: "article.md",
+  imageSubdir: "images",
 });
 // result.markdown, result.images, result.savedTo, result.metadata
 ```
 
-| Parameter | Type | Description |
-|----------|-----|-------------|
-| `options.dir` | `string` | Output directory |
-| `options.name` | `string` | Markdown filename |
+| Parameter             | Type     | Description                             |
+| --------------------- | -------- | --------------------------------------- |
+| `options.dir`         | `string` | Output directory                        |
+| `options.name`        | `string` | Markdown filename                       |
 | `options.imageSubdir` | `string` | Images subdirectory (default: `images`) |
-| `options.minWidth` | `number` | Minimum image width (default: `100`) |
-| `options.minHeight` | `number` | Minimum image height (default: `100`) |
+| `options.minWidth`    | `number` | Minimum image width (default: `100`)    |
+| `options.minHeight`   | `number` | Minimum image height (default: `100`)   |
 
 #### `closeTab()`
 
@@ -194,14 +216,14 @@ await google.closeTab();
 Navigates to the n-th Google pagination page. If `n` is omitted or equals 0 — clicks “Next” (`#pnnext`).
 
 ```javascript
-await google.goToPage(2);   // go to page 2
-await google.goToPage();    // next page
+await google.goToPage(2); // go to page 2
+await google.goToPage(); // next page
 ```
 
-| Parameter | Type | Description |
-|----------|-----|-------------|
-| `n` | `number` | Page number (1-based). `0` / `undefined` = next page |
-| `options.timeout` | `number` | Timeout |
+| Parameter         | Type     | Description                                          |
+| ----------------- | -------- | ---------------------------------------------------- |
+| `n`               | `number` | Page number (1-based). `0` / `undefined` = next page |
+| `options.timeout` | `number` | Timeout                                              |
 
 After navigation, the cached link list is cleared — call `getLinks()` again.
 
@@ -219,17 +241,17 @@ Google selectors are stored in the profile `scripts/sites/google-search.json` an
 
 Export: `GOOGLE_SELECTORS` from `scripts/googleSearch.js`.
 
-| Key | Selector | Description |
-|------|----------|-------------|
-| `url` | `https://www.google.com` | Google base URL |
-| `searchInput` | `textarea[name="q"], input[name="q"]` | Search input |
-| `resultAnchor` | `#search a[href], #rso a[href], .MjjYud a[href], .tF2Cxc a[href]` | All anchors in the results area |
-| `resultTitle` | `h3` | Result title (inside/near the anchor) |
-| `resultBlock` | `.MjjYud, .tF2Cxc, div.g, [data-hveid]` | Wrapper block for a single result |
-| `resultSnippet` | `[data-sncf], [style*="-webkit-line-clamp"], .VwiC3b, .lEBKkf` | Snippet |
-| `adContainers` | `#tads, #bottomads, [data-text-ad], [data-ad-slot]` | Ad containers |
-| `nextPage` | `#pnnext, a[aria-label="Next"]` | “Next” link |
-| `paginationLink` | `a[aria-label="Page {n}"]` | Link to page N |
+| Key              | Selector                                                          | Description                           |
+| ---------------- | ----------------------------------------------------------------- | ------------------------------------- |
+| `url`            | `https://www.google.com`                                          | Google base URL                       |
+| `searchInput`    | `textarea[name="q"], input[name="q"]`                             | Search input                          |
+| `resultAnchor`   | `#search a[href], #rso a[href], .MjjYud a[href], .tF2Cxc a[href]` | All anchors in the results area       |
+| `resultTitle`    | `h3`                                                              | Result title (inside/near the anchor) |
+| `resultBlock`    | `.MjjYud, .tF2Cxc, div.g, [data-hveid]`                           | Wrapper block for a single result     |
+| `resultSnippet`  | `[data-sncf], [style*="-webkit-line-clamp"], .VwiC3b, .lEBKkf`    | Snippet                               |
+| `adContainers`   | `#tads, #bottomads, [data-text-ad], [data-ad-slot]`               | Ad containers                         |
+| `nextPage`       | `#pnnext, a[aria-label="Next"]`                                   | “Next” link                           |
+| `paginationLink` | `a[aria-label="Page {n}"]`                                        | Link to page N                        |
 
 Note: Google localizes some `aria-label` values depending on UI language. The `scripts/sites/google-search.json` profile contains additional locale-specific selector variants — treat it as the source of truth.
 
@@ -272,7 +294,7 @@ Without `--links` and `--open`, it prints links to stdout by default.
 
 ## Dependencies
 
-- [_shared](./_shared.md) — browser initialization
+- [\_shared](./_shared.md) — browser initialization
 - [getContent](./getContent.md) — page content extraction
 - [getForms](./getForms.md) — search form extraction
 - [browserUse](../utils/browserUse.md) — Chrome control
@@ -280,4 +302,3 @@ Without `--links` and `--open`, it prints links to stdout by default.
 ## Site profile (selectors/controls)
 
 Google selectors and UI controls are stored in `scripts/sites/google-search.json`. If Google changes markup again — update it **there**, not in code.
-

@@ -1,3 +1,26 @@
+---
+title: Agent Browser Workspace — tools overview
+description: >
+  Main entry point for agents. Overview of all CLI tools and Node.js APIs in this repo:
+  browser control, content extraction, form detection, Google Search automation.
+  Includes usage policy (CLI-first), single-threaded browser constraint, page blocker handling,
+  escalation strategy for JS-heavy pages, PDF handling, site profiles, and tool selection table.
+when_to_read: >
+  Read this file first when starting any browser-related task. Consult it to choose the right
+  tool for a task, understand the CLI-first policy, handle page blockers (CAPTCHA, login),
+  apply the escalation strategy for empty/minimal content, or work with PDF files.
+related:
+  - INSTALLATION.md
+  - RESEARCH.md
+  - scripts/getContent.md
+  - scripts/getForms.md
+  - scripts/getAll.md
+  - scripts/googleSearch.md
+  - utils/browserUse.md
+  - utils/getDataFromText.md
+  - scripts/_shared.md
+---
+
 # agent-browser-workspace
 
 Local toolkit for working with web pages: control a real Chrome instance, extract structured data from HTML, save pages as Markdown (with downloaded images), and automate Google Search.

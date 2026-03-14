@@ -1,8 +1,30 @@
+---
+title: "getForms — form extraction"
+description: >
+  Extract all forms from a browser page with automatic classification (search, auth, filter,
+  contact, subscribe, generic) and field parsing. Each field gets a ready-to-use CSS selector
+  compatible with browser.fill() / browser.fillForm(). Returns form type, confidence, evidence,
+  features, and full field list. CLI and API interfaces.
+when_to_read: >
+  Read when you need to discover forms on a page, get CSS selectors for form fields,
+  classify form types (login, search, filter, etc.), or prepare data for browser.fill()
+  / browser.fillForm(). Also read to understand the form result shape and field selector
+  generation priority.
+provides:
+  cli: "node scripts/getForms.js [--url <url>] [--output <file>]"
+  api: "getForms({ url, ... })"
+related:
+  - scripts/_shared.md
+  - utils/browserUse.md
+  - utils/getDataFromText.md
+  - AGENT_BROWSER.md
+---
+
 # getForms
 
 Extract all forms from the current (or specified) browser page with automatic classification (search, auth, filter, contact, subscribe, generic) and field parsing. Each field gets a ready-to-use CSS selector compatible with `browser.fill()` / `browser.fillForm()`.
 
-> **CLI-first.** Use this tool via CLI unless you are authoring new tooling. See `AGENTS.md` for the policy and escalation guidance.
+> **CLI-first.** Use this tool via CLI unless you are authoring new tooling. See `AGENT_BROWSER.md` for the policy and escalation guidance.
 
 ## Quick start
 
@@ -27,15 +49,15 @@ The module can also be imported from Node.js, but the recommended interface is t
 
 ### `getForms(options)`
 
-| Option | Type | Default | Description |
-|-------|-----|---------|-------------|
-| `url` | `string` | `null` | URL to navigate to (`null` = current page) |
-| `browser` | `BrowserUse` | `null` | Existing browser instance |
-| `html` | `string` | `null` | Pre-fetched HTML (skips `browser.getHtml()`) |
-| `cdp` | `boolean\|string` | — | CDP mode |
-| `launch` | `boolean` | — | Force launch mode |
-| `headless` | `boolean` | `false` | Headless |
-| `timeout` | `number` | `30000` | Timeout |
+| Option     | Type              | Default | Description                                  |
+| ---------- | ----------------- | ------- | -------------------------------------------- |
+| `url`      | `string`          | `null`  | URL to navigate to (`null` = current page)   |
+| `browser`  | `BrowserUse`      | `null`  | Existing browser instance                    |
+| `html`     | `string`          | `null`  | Pre-fetched HTML (skips `browser.getHtml()`) |
+| `cdp`      | `boolean\|string` | —       | CDP mode                                     |
+| `launch`   | `boolean`         | —       | Force launch mode                            |
+| `headless` | `boolean`         | `false` | Headless                                     |
+| `timeout`  | `number`          | `30000` | Timeout                                      |
 
 ### Result shape
 
@@ -108,31 +130,31 @@ The module can also be imported from Node.js, but the recommended interface is t
 
 Each form field contains:
 
-| Field | Type | Description |
-|------|-----|-------------|
-| `tag` | `string` | HTML tag: `input`, `select`, `textarea`, `button` |
-| `type` | `string` | Field type: `text`, `password`, `email`, `submit`, `select`, `textarea`, ... |
-| `name` | `string` | `name` attribute |
-| `id` | `string` | `id` attribute |
-| `placeholder` | `string` | `placeholder` attribute |
-| `value` | `string` | `value` attribute |
-| `selector` | `string` | Ready CSS selector for `browser.fill()` |
-| `text` | `string` | Button text (only for `button`) |
-| `ariaLabel` | `string` | `aria-label` (if present) |
-| `options` | `Array` | `<select>` options: `[{ value, text, selected }]` |
+| Field         | Type     | Description                                                                  |
+| ------------- | -------- | ---------------------------------------------------------------------------- |
+| `tag`         | `string` | HTML tag: `input`, `select`, `textarea`, `button`                            |
+| `type`        | `string` | Field type: `text`, `password`, `email`, `submit`, `select`, `textarea`, ... |
+| `name`        | `string` | `name` attribute                                                             |
+| `id`          | `string` | `id` attribute                                                               |
+| `placeholder` | `string` | `placeholder` attribute                                                      |
+| `value`       | `string` | `value` attribute                                                            |
+| `selector`    | `string` | Ready CSS selector for `browser.fill()`                                      |
+| `text`        | `string` | Button text (only for `button`)                                              |
+| `ariaLabel`   | `string` | `aria-label` (if present)                                                    |
+| `options`     | `Array`  | `<select>` options: `[{ value, text, selected }]`                            |
 
 Selector generation priority: `#id` → `[name]` → `[aria-label]` → `tag[type]`.
 
 ### Form types
 
-| Type | Description | Signals |
-|-----|-------------|---------|
-| `search` | Search form | `role="search"`, `input[type="search"]`, action contains "search" |
-| `auth` | Authentication/login | `input[type="password"]`, class/id contains "login", "auth" |
-| `filter` | Filters/sorting | Many `select`, class/id contains "filter", "sort" |
-| `contact` | Contact/feedback | `textarea`, class/id contains "contact", "feedback" |
+| Type        | Description             | Signals                                                            |
+| ----------- | ----------------------- | ------------------------------------------------------------------ |
+| `search`    | Search form             | `role="search"`, `input[type="search"]`, action contains "search"  |
+| `auth`      | Authentication/login    | `input[type="password"]`, class/id contains "login", "auth"        |
+| `filter`    | Filters/sorting         | Many `select`, class/id contains "filter", "sort"                  |
+| `contact`   | Contact/feedback        | `textarea`, class/id contains "contact", "feedback"                |
 | `subscribe` | Subscription/newsletter | `input[type="email"]`, class/id contains "subscribe", "newsletter" |
-| `generic` | Other | Doesn’t match other types |
+| `generic`   | Other                   | Doesn’t match other types                                          |
 
 ## CLI
 
@@ -164,12 +186,11 @@ node scripts/getForms.js --cdp http://localhost:9222 --output forms.json
 
 ## Writing custom scripts (last resort)
 
-If you need to actually fill/submit forms as part of a repeatable automation flow, you will need programmatic browser control (API) via `utils/browserUse`. Do this only when you’re confident about the site structure/selectors. See `AGENTS.md` for the policy.
+If you need to actually fill/submit forms as part of a repeatable automation flow, you will need programmatic browser control (API) via `utils/browserUse`. Do this only when you’re confident about the site structure/selectors. See `AGENT_BROWSER.md` for the policy.
 
 ## Dependencies
 
-- [_shared](./_shared.md) — browser initialization
+- [\_shared](./_shared.md) — browser initialization
 - [browserUse](../utils/browserUse.md) — Chrome control
 - [getDataFromText](../utils/getDataFromText.md) — form detection and classification
 - [cheerio](https://github.com/cheeriojs/cheerio) — parse form fields from HTML
-

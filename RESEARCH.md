@@ -1,8 +1,27 @@
+---
+title: Deep Research — methodology
+description: >
+  Step-by-step methodology for running high-quality deep research via Google Search.
+  Covers five phases: planning (topic decomposition, query generation), data collection
+  (SERP snapshots via links.json, page extraction, insights.md), gap analysis (snowball
+  sampling, additional queries), cross-verification (numeric data, resource status),
+  and report writing (structure, footnotes, quality checklist). Defines file structure
+  (archive/ + researches/), insights format, and common mistakes.
+when_to_read: >
+  Read when the task involves deep research, multi-query Google Search investigations,
+  writing research reports, or when you need to understand the archive/researches
+  file structure and the insights.md workflow.
+related:
+  - AGENT_BROWSER.md
+  - scripts/googleSearch.md
+  - scripts/getContent.md
+---
+
 # Deep Research — in-depth research methodology
 
-Instructions for running a high-quality research process via Google Search using the tools from [AGENTS.md](AGENTS.md).
+Instructions for running a high-quality research process via Google Search using the tools from [AGENT_BROWSER.md](AGENT_BROWSER.md).
 
-Browser constraints (single-threaded, sequential access) are described in [AGENTS.md](AGENTS.md) and fully apply here.
+Browser constraints (single-threaded, sequential access) are described in [AGENT_BROWSER.md](AGENT_BROWSER.md) and fully apply here.
 
 > **CLI-first.** Prefer running the repository tools via CLI (`node scripts/...`, `node utils/...`). Avoid writing custom JavaScript scripts; only do it as a last resort when the CLI tools cannot perform a required step.
 
@@ -167,8 +186,7 @@ Take one query at a time. For each query:
 
 **Writing insights is part of the link-processing loop, not a separate later step.** Do not open the next link until you have written insights from the current page to disk. This guarantees that if the agent gets interrupted, everything already processed is preserved.
 
-4. **Empty or minimal content.** If `getContent` returns empty Markdown or only header/menu — the page likely renders via JavaScript. Do not skip it: apply the **escalation strategy** from “Reliable content extraction” in [AGENTS.md](AGENTS.md):
-
+4. **Empty or minimal content.** If `getContent` returns empty Markdown or only header/menu — the page likely renders via JavaScript. Do not skip it: apply the **escalation strategy** from “Reliable content extraction” in [AGENT_BROWSER.md](AGENT_BROWSER.md):
    - Try a CLI “wait + extract” run: `node utils/browserUse.js <url> --wait "<selector>" --extract out.json`
    - Take a screenshot for visual verification: `node utils/browserUse.js <url> --screenshot debug.png --full-page`
    - If the page requires scrolling to load content — automated scrolling is an advanced / last-resort case (API).
@@ -274,11 +292,11 @@ The final report must be saved to the file path in the first line of `insights.m
 
    Example format:
 
-   | Item | Type | Primary source | Where to spot it first |
-   |---|---|---|---|
-   | Qwen3.5 | Model (open-source) | HF Model Hub | HF Daily Papers, X (@akhaliq) |
-   | AnchorWeave | Research | arXiv + GitHub Pages | arXiv cs.CV, HF Papers |
-   | Cohere Tiny Aya | Corporate blog | cohere.com/blog | Newsletters, X |
+   | Item            | Type                | Primary source       | Where to spot it first        |
+   | --------------- | ------------------- | -------------------- | ----------------------------- |
+   | Qwen3.5         | Model (open-source) | HF Model Hub         | HF Daily Papers, X (@akhaliq) |
+   | AnchorWeave     | Research            | arXiv + GitHub Pages | arXiv cs.CV, HF Papers        |
+   | Cohere Tiny Aya | Corporate blog      | cohere.com/blog      | Newsletters, X                |
 
 4. **Main sections** — grouped by thematic categories (not by the search order). Each section includes:
    - **A descriptive paragraph** — what this category is, why it matters, how it fits the landscape.
@@ -330,22 +348,22 @@ Visual elements complement the text but **do not replace** descriptive paragraph
 
 Go through every item before finalizing the report:
 
-| # | Criterion | Threshold |
-|---|---|---|
-| 1 | Search queries | 15+ |
-| 2 | Pages reviewed | 40+ |
-| 3 | Unique sources in References | 30+ |
-| 4 | Facts with numbers have footnotes | All |
-| 5 | Numeric data verified by 2+ sources | Key facts |
-| 6 | No uncovered aspects from the plan (Phase 1) | All covered |
-| 7 | Each category has a descriptive paragraph | All |
-| 8 | Date and method are stated | Yes |
-| 9 | Practical recommendations are present | Yes |
-| 10 | No claims without sources | Yes |
-| 11 | Snowball candidates from Phase 2.2 are processed | All |
-| 12 | Recommended resources verified as active (Phase 4) | All |
-| 13 | Mapping table (if examples exist) | Yes |
-| 14 | Report saved to the file from the first line of `insights.md` | Yes |
+| #   | Criterion                                                     | Threshold   |
+| --- | ------------------------------------------------------------- | ----------- |
+| 1   | Search queries                                                | 15+         |
+| 2   | Pages reviewed                                                | 40+         |
+| 3   | Unique sources in References                                  | 30+         |
+| 4   | Facts with numbers have footnotes                             | All         |
+| 5   | Numeric data verified by 2+ sources                           | Key facts   |
+| 6   | No uncovered aspects from the plan (Phase 1)                  | All covered |
+| 7   | Each category has a descriptive paragraph                     | All         |
+| 8   | Date and method are stated                                    | Yes         |
+| 9   | Practical recommendations are present                         | Yes         |
+| 10  | No claims without sources                                     | Yes         |
+| 11  | Snowball candidates from Phase 2.2 are processed              | All         |
+| 12  | Recommended resources verified as active (Phase 4)            | All         |
+| 13  | Mapping table (if examples exist)                             | Yes         |
+| 14  | Report saved to the file from the first line of `insights.md` | Yes         |
 
 If at least one criterion is not met — improve the report before finalization.
 
@@ -353,18 +371,17 @@ If at least one criterion is not met — improve the report before finalization.
 
 ## Common mistakes
 
-| Mistake | How to avoid |
-|--------|-------------|
-| Too few queries (3–5) | Plan 15–20 before you start searching |
-| Too few pages (10–20) | Aim for 40–60, track the count |
-| Missing References | Write URLs into `insights.md` for each extraction — assembling References later becomes trivial |
-| Inflated numbers (audience, ratings) | Verify via 2+ sources, take a conservative estimate |
-| Entire categories missing | Compare against Phase 1 plan, do gap analysis in Phase 3 |
-| Only tables, no explanations | Every table must have a context paragraph |
-| Source title without URL | Write `[Title](URL)` at the moment of extraction |
-| Missing resources mentioned inside pages | Snowball sampling (Phase 2.2): capture all `[candidate]`, process in Phase 3 |
-| Recommending a shut-down/migrated resource | Live-visit each resource URL in Phase 4; record status changes |
-| No link to example items from the task | Mapping table (Phase 1.2 + Phase 5): examples → type → primary source → channel |
-| Too few references for a large list of resources | Each resource needs at least 1 reference; discovery queries + snowball add extra sources |
-| Lost the final report path after context compression | The path is in the first line of `insights.md` (Phase 1.4) — read it before Phase 5 |
-
+| Mistake                                              | How to avoid                                                                                    |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Too few queries (3–5)                                | Plan 15–20 before you start searching                                                           |
+| Too few pages (10–20)                                | Aim for 40–60, track the count                                                                  |
+| Missing References                                   | Write URLs into `insights.md` for each extraction — assembling References later becomes trivial |
+| Inflated numbers (audience, ratings)                 | Verify via 2+ sources, take a conservative estimate                                             |
+| Entire categories missing                            | Compare against Phase 1 plan, do gap analysis in Phase 3                                        |
+| Only tables, no explanations                         | Every table must have a context paragraph                                                       |
+| Source title without URL                             | Write `[Title](URL)` at the moment of extraction                                                |
+| Missing resources mentioned inside pages             | Snowball sampling (Phase 2.2): capture all `[candidate]`, process in Phase 3                    |
+| Recommending a shut-down/migrated resource           | Live-visit each resource URL in Phase 4; record status changes                                  |
+| No link to example items from the task               | Mapping table (Phase 1.2 + Phase 5): examples → type → primary source → channel                 |
+| Too few references for a large list of resources     | Each resource needs at least 1 reference; discovery queries + snowball add extra sources        |
+| Lost the final report path after context compression | The path is in the first line of `insights.md` (Phase 1.4) — read it before Phase 5             |
